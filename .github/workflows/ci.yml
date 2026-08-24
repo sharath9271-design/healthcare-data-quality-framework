@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  data-quality-checks:
+    name: Data quality check suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unit + integration test suite
+        run: pytest -v
+
+      - name: Run the full pipeline against the demo dataset
+        # This is a demo run, not a gate: the committed synthetic dataset
+        # deliberately contains a few seeded data-quality issues so the
+        # report below has real findings in it. The line above (pytest)
+        # is what actually gates the build — it verifies every check
+        # function behaves correctly, including correctly catching these
+        # seeded issues.
+        run: python pipeline.py || true
+
+      - name: Upload quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report
+          path: reports/latest_quality_report.json
+          retention-days: 14
