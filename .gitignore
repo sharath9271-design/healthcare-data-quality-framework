@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/warehouse.db
+reports/latest_quality_report.json
+reports/quality_report_history.jsonl
+.venv/
+venv/
+.DS_Store
